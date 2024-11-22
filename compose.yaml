@@ -1,0 +1,40 @@
+services:
+# -------------------------------Database---------------------------------------- 
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./sql:/sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=bd1
+    networks:
+      - bd-network
+    ports:
+      - "5432:5432"
+    deploy:
+      labels:
+        app.bd1.description: "database service"
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      resources:
+        limits:
+          # Rever cpu limit
+          cpus: '4'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+# ----------------------------VOLUMES----------------------------------------
+volumes:
+  postgres:
+# ----------------------------NETWORKS--------------------------------------- 
+networks:
+  bd-network:
+    driver: bridge
+    labels:
+      app.bd1.description: "db1 services network"
